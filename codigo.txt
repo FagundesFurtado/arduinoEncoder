@@ -1,0 +1,92 @@
+const byte Encoder = 2;
+int contador = 0; 
+int valorPercorrer = 0;
+int distanciaUltrassom = 30;
+
+int splitString(char* frase);
+int timeout = 500;
+
+const byte trigger = 6;
+const byte echo = 7;
+
+
+void setup() {
+  pinMode(Encoder, INPUT);
+  attachInterrupt(0, calculaPulso, RISING);
+   Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  Serial.println("Iniciando encoder");
+
+}
+
+void loop() {
+
+  ultrassom();
+
+if(Serial.available()> 0){
+   String teste = Serial.readString();
+  if(teste == "Encoder\n"){
+    String saida = "Encoder " + String(contador);
+    Serial.println(saida);
+    }
+  else{
+    if(teste == "Zerar\n"){
+      Serial.println("Zerando contador");
+      contador = 0;
+      }
+     else{
+      char dist[10] = "Distancia";
+      char ultra[10] = "Ultrassom";
+      char frase[30];
+      teste.toCharArray(frase, sizeof(frase)); 
+      if(strstr(frase, ultra)){
+        distanciaUltrassom = splitString(frase);
+        Serial.print("Ultrassom: ");
+        Serial.println(distanciaUltrassom);
+     }
+
+    else{
+      if(strstr(frase, dist)){
+        valorPercorrer = splitString(frase);
+        String saida = "Valor Percorrer " + String(valorPercorrer);
+        Serial.println(saida);
+        
+        }
+      else{
+        Serial.println("Comando invalido");
+      }
+    }
+    }
+  }
+  }
+}
+
+int splitString(char* frase){
+  char * saida = strtok(frase, " ");
+  char * auxiliar = strtok(NULL, " ");
+  String converte = auxiliar;
+  return converte.toInt();
+}
+
+
+void ultrassom(){
+  
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+
+  uint32_t pulse_time = pulseIn(echo, HIGH, timeout);
+  double distance = 0.01715 * pulse_time;
+  if(distance < distanciaUltrassom){
+    Serial.println("Obstaculo");
+  }
+}
+void calculaPulso(){
+   contador++;
+   if(contador == valorPercorrer){
+    contador =0;
+    Serial.println("Deslocou o valor desejado");
+    }
+}
