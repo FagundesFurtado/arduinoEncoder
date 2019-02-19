@@ -8,6 +8,11 @@ int timeout = 500;
 
 const byte trigger = 6;
 const byte echo = 7;
+const byte trigger2 = 8;
+const byte echo2 = 9;
+
+int byte atualTrigger = 6;
+int byte atualEcho = 7;
 
 
 void setup() {
@@ -32,32 +37,45 @@ if(Serial.available()> 0){
     Serial.println(saida);
     }
   else{
-    if(teste == "Zerar\n"){
-      Serial.println("Zerando contador");
-      contador = 0;
-      }
-     else{
-      char dist[10] = "Distancia";
-      char ultra[10] = "Ultrassom";
-      char frase[30];
-      teste.toCharArray(frase, sizeof(frase)); 
-      if(strstr(frase, ultra)){
-        distanciaUltrassom = splitString(frase);
-        Serial.print("Ultrassom: ");
-        Serial.println(distanciaUltrassom);
-     }
-
-    else{
-      if(strstr(frase, dist)){
-        valorPercorrer = splitString(frase);
-        String saida = "Valor Percorrer " + String(valorPercorrer);
-        Serial.println(saida);
-        
+    if(teste == "Sentido"){
+        String valor = splitString(teste);
+        if(valor == "true"){
+            atualEcho = echo;
+            atualTrigger = trigger;
+        }else{
+            atualEcho = echo2;
+            atualTrigger = trigger2;
         }
-      else{
-        Serial.println("Comando invalido");
-      }
-    }
+        Serial.println(teste);
+
+    }else{
+        if(teste == "Zerar\n"){
+            Serial.println("Zerando contador");
+            contador = 0;
+            }
+            else{
+                char dist[10] = "Distancia";
+                char ultra[10] = "Ultrassom";
+                char frase[30];
+                teste.toCharArray(frase, sizeof(frase)); 
+                if(strstr(frase, ultra)){
+                    distanciaUltrassom = splitString(frase);
+                    Serial.print("Ultrassom: ");
+                    Serial.println(distanciaUltrassom);
+                }
+
+                else{
+                    if(strstr(frase, dist)){
+                        valorPercorrer = splitString(frase);
+                        String saida = "Valor Percorrer " + String(valorPercorrer);
+                        Serial.println(saida);
+                        
+                        }
+                    else{
+                        Serial.println("Comando invalido");
+                    }
+                }
+            }
     }
   }
   }
@@ -73,11 +91,11 @@ int splitString(char* frase){
 
 void ultrassom(){
   
-  digitalWrite(trigger, HIGH);
+  digitalWrite(atualTrigger, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigger, LOW);
+  digitalWrite(atualTrigger, LOW);
 
-  uint32_t pulse_time = pulseIn(echo, HIGH, timeout);
+  uint32_t pulse_time = pulseIn(atualEcho, HIGH, timeout);
   double distance = 0.01715 * pulse_time;
   if(distance < distanciaUltrassom){
     Serial.println("Obstaculo");
